@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>รายการสินค้า - Product List</title>
+    <title>ระบบจัดการสินค้า - Products API</title>
     <style>
         * {
             margin: 0;
@@ -13,110 +13,363 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        h1 {
-            text-align: center;
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            margin-bottom: 30px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
             font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .loading {
-            text-align: center;
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 65, 108, 0.4);
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-box::after {
+            content: '🔍';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             font-size: 1.2rem;
-            padding: 50px;
         }
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 30px;
         }
 
         .product-card {
             background: white;
             border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #f1f3f4;
         }
 
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
-        .product-id {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #74b9ff;
+        .product-image {
+            height: 200px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-content {
+            padding: 20px;
         }
 
         .product-name {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #2d3436;
-            margin-bottom: 15px;
-            margin-right: 70px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
         }
 
         .product-description {
-            color: #636e72;
-            line-height: 1.6;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .product-category {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
             font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .error {
-            background: #ff7675;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 20px 0;
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c66;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
         }
 
-        .stats {
-            text-align: center;
-            color: white;
-            margin-bottom: 25px;
-            font-size: 1.1rem;
-            background: rgba(255,255,255,0.2);
-            padding: 10px 20px;
-            border-radius: 25px;
-            display: inline-block;
-            margin-left: 50%;
-            transform: translateX(-50%);
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #6c6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
         }
 
         @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            
             .products-grid {
                 grid-template-columns: 1fr;
+                padding: 15px;
             }
             
-            .product-card {
-                padding: 20px;
-            }
-            
-            h1 {
+            .header h1 {
                 font-size: 2rem;
             }
         }
@@ -124,83 +377,297 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛍️ รายการสินค้า</h1>
-        
-        <div id="loading" class="loading">
-            <div>กำลังโหลดข้อมูลสินค้า...</div>
+        <div class="header">
+            <h1>🛍️ ระบบจัดการสินค้า</h1>
+            <p>เชื่อมต่อกับ Products API - จัดการสินค้าได้อย่างง่ายดาย</p>
         </div>
 
-        <div id="stats" class="stats" style="display: none;"></div>
-        
-        <div id="error" class="error" style="display: none;"></div>
-        
-        <div id="products" class="products-grid"></div>
+        <div class="controls">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="loadProducts()">🔄 โหลดสินค้าทั้งหมด</button>
+                <button class="btn btn-success" onclick="openAddModal()">➕ เพิ่มสินค้าใหม่</button>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="ค้นหาสินค้า..." onkeyup="searchProducts()">
+                </div>
+            </div>
+        </div>
+
+        <div id="productsContainer">
+            <div class="loading">กำลังโหลดข้อมูลสินค้า...</div>
+        </div>
+    </div>
+
+    <!-- Modal สำหรับเพิ่ม/แก้ไขสินค้า -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modalTitle">เพิ่มสินค้าใหม่</h2>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="productName">ชื่อสินค้า *</label>
+                        <input type="text" id="productName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">รายละเอียด *</label>
+                        <textarea id="productDescription" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImage">URL รูปภาพ</label>
+                        <input type="url" id="productImage" name="image" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">ราคา (บาท)</label>
+                        <input type="number" id="productPrice" name="price" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">หมวดหมู่</label>
+                        <select id="productCategory" name="category">
+                            <option value="general">ทั่วไป</option>
+                            <option value="smartphone">สมาร์ทโฟน</option>
+                            <option value="laptop">แล็ปท็อป</option>
+                            <option value="tablet">แท็บเล็ต</option>
+                            <option value="audio">เสียง</option>
+                            <option value="camera">กล้อง</option>
+                            <option value="gaming">เกมมิ่ง</option>
+                            <option value="wearable">อุปกรณ์สวมใส่</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-success">💾 บันทึก</button>
+                        <button type="button" class="btn btn-danger" onclick="closeModal()">❌ ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/api/products';
+        const API_BASE_URL = 'http://localhost:3001/api';
+        let allProducts = [];
+        let currentEditId = null;
 
+        // โหลดสินค้าทั้งหมด
         async function loadProducts() {
-            const loading = document.getElementById('loading');
-            const error = document.getElementById('error');
-            const products = document.getElementById('products');
-            const stats = document.getElementById('stats');
-
             try {
-                console.log('กำลังโหลดข้อมูลจาก API...');
-                
-                const response = await fetch(API_URL);
+                showLoading();
+                const response = await fetch(`${API_BASE_URL}/products`);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ไม่สามารถเชื่อมต่อ API ได้`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-
-                const data = await response.json();
-                console.log('โหลดข้อมูลสำเร็จ:', data);
-
-                // ซ่อน loading
-                loading.style.display = 'none';
-
-                // แสดงสถิติ
-                stats.innerHTML = `📊 พบสินค้าทั้งหมด ${data.length} รายการ`;
-                stats.style.display = 'block';
-
-                // แสดงสินค้า
-                displayProducts(data);
-
-            } catch (err) {
-                console.error('Error:', err);
-                loading.style.display = 'none';
-                error.style.display = 'block';
-                error.innerHTML = `
-                    <h3>❌ เกิดข้อผิดพลาด</h3>
-                    <p>${err.message}</p>
-                    <small>กรุณาตรวจสอบว่า Express server ทำงานอยู่ที่ http://localhost:3000</small>
-                `;
+                
+                allProducts = await response.json();
+                displayProducts(allProducts);
+                showSuccess(`โหลดสินค้าสำเร็จ! พบ ${allProducts.length} รายการ`);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showError(`ไม่สามารถโหลดสินค้าได้: ${error.message}`);
             }
         }
 
-        function displayProducts(data) {
-            const container = document.getElementById('products');
+        // แสดงสินค้า
+        function displayProducts(products) {
+            const container = document.getElementById('productsContainer');
             
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: white;">ไม่พบข้อมูลสินค้า</p>';
+            if (products.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 50px; color: #7f8c8d;">
+                        <h3>😔 ไม่พบสินค้า</h3>
+                        <p>ลองเพิ่มสินค้าใหม่หรือค้นหาด้วยคำอื่น</p>
+                    </div>
+                `;
                 return;
             }
 
-            const html = data.map(product => `
+            const productsHTML = products.map(product => `
                 <div class="product-card">
-                    <div class="product-id">#${product.id}</div>
-                    <div class="product-name">${product.name}</div>
-                    <div class="product-description">${product.description}</div>
+                    <div class="product-image">
+                        ${product.image && product.image !== '/images/default.jpg' ? 
+                            `<img src="${product.image}" alt="${product.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='📦';">` : 
+                            '📦'
+                        }
+                    </div>
+                    <div class="product-content">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-category">${getCategoryName(product.category)}</div>
+                        <div class="product-description">${product.description}</div>
+                        <div class="product-price">฿${product.price ? product.price.toLocaleString() : '0'}</div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary btn-sm" onclick="editProduct(${product.id})">✏️ แก้ไข</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">🗑️ ลบ</button>
+                        </div>
+                    </div>
                 </div>
             `).join('');
 
-            container.innerHTML = html;
+            container.innerHTML = `<div class="products-grid">${productsHTML}</div>`;
         }
 
-        // โหลดข้อมูลเมื่อหน้าเว็บพร้อม
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        // แปลงชื่อหมวดหมู่
+        function getCategoryName(category) {
+            const categories = {
+                'general': 'ทั่วไป',
+                'smartphone': 'สมาร์ทโฟน',
+                'laptop': 'แล็ปท็อป',
+                'tablet': 'แท็บเล็ต',
+                'audio': 'เสียง',
+                'camera': 'กล้อง',
+                'gaming': 'เกมมิ่ง',
+                'wearable': 'อุปกรณ์สวมใส่'
+            };
+            return categories[category] || category;
+        }
+
+        // ค้นหาสินค้า
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredProducts = allProducts.filter(product =>
+                product.name.toLowerCase().includes(searchTerm) ||
+                product.description.toLowerCase().includes(searchTerm) ||
+                product.category.toLowerCase().includes(searchTerm)
+            );
+            displayProducts(filteredProducts);
+        }
+
+        // เปิด Modal เพิ่มสินค้า
+        function openAddModal() {
+            currentEditId = null;
+            document.getElementById('modalTitle').textContent = 'เพิ่มสินค้าใหม่';
+            document.getElementById('productForm').reset();
+            document.getElementById('productModal').style.display = 'block';
+        }
+
+        // แก้ไขสินค้า
+        async function editProduct(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/${id}`);
+                if (!response.ok) throw new Error('ไม่พบสินค้า');
+                
+                const product = await response.json();
+                currentEditId = id;
+                
+                document.getElementById('modalTitle').textContent = 'แก้ไขสินค้า';
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productDescription').value = product.description;
+                document.getElementById('productImage').value = product.image || '';
+                document.getElementById('productPrice').value = product.price || '';
+                document.getElementById('productCategory').value = product.category;
+                
+                document.getElementById('productModal').style.display = 'block';
+            } catch (error) {
+                showError(`ไม่สามารถโหลดข้อมูลสินค้าได้: ${error.message}`);
+            }
+        }
+
+        // ลบสินค้า
+        async function deleteProduct(id) {
+            if (!confirm('คุณแน่ใจว่าต้องการลบสินค้านี้?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('ไม่สามารถลบสินค้าได้');
+                
+                showSuccess('ลบสินค้าเรียบร้อย!');
+                loadProducts();
+            } catch (error) {
+                showError(`ไม่สามารถลบสินค้าได้: ${error.message}`);
+            }
+        }
+
+        // ปิด Modal
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+            currentEditId = null;
+        }
+
+        // จัดการ Form Submit
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const productData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                image: formData.get('image') || '/images/default.jpg',
+                price: parseFloat(formData.get('price')) || 0,
+                category: formData.get('category')
+            };
+            
+            try {
+                const url = currentEditId ? 
+                    `${API_BASE_URL}/products/${currentEditId}` : 
+                    `${API_BASE_URL}/products`;
+                
+                const method = currentEditId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (!response.ok) throw new Error('ไม่สามารถบันทึกสินค้าได้');
+                
+                showSuccess(currentEditId ? 'แก้ไขสินค้าเรียบร้อย!' : 'เพิ่มสินค้าเรียบร้อย!');
+                closeModal();
+                loadProducts();
+            } catch (error) {
+                showError(`ไม่สามารถบันทึกสินค้าได้: ${error.message}`);
+            }
+        });
+
+        // แสดงสถานะ Loading
+        function showLoading() {
+            document.getElementById('productsContainer').innerHTML = 
+                '<div class="loading">กำลังโหลดข้อมูลสินค้า...</div>';
+        }
+
+        // แสดงข้อความ Error
+        function showError(message) {
+            const existingError = document.querySelector('.error');
+            if (existingError) existingError.remove();
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = `❌ ${message}`;
+            document.querySelector('.container').appendChild(errorDiv);
+            
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        // แสดงข้อความ Success
+        function showSuccess(message) {
+            const existingSuccess = document.querySelector('.success');
+            if (existingSuccess) existingSuccess.remove();
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = `✅ ${message}`;
+            document.querySelector('.container').appendChild(successDiv);
+            
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+
+        // ปิด Modal เมื่อคลิกข้างนอก
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // โหลดสินค้าเมื่อเริ่มต้น
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+        });
     </script>
 </body>
 </html>
