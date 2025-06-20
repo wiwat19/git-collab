@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายการสินค้า - Product List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            padding: 50px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .product-id {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #74b9ff;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .product-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 15px;
+            margin-right: 70px;
+        }
+
+        .product-description {
+            color: #636e72;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .error {
+            background: #ff7675;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .stats {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-card {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ รายการสินค้า</h1>
+        
+        <div id="loading" class="loading">
+            <div>กำลังโหลดข้อมูลสินค้า...</div>
+        </div>
+
+        <div id="stats" class="stats" style="display: none;"></div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="products" class="products-grid"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/products';
+
+        async function loadProducts() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const products = document.getElementById('products');
+            const stats = document.getElementById('stats');
+
+            try {
+                console.log('กำลังโหลดข้อมูลจาก API...');
+                
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ไม่สามารถเชื่อมต่อ API ได้`);
+                }
+
+                const data = await response.json();
+                console.log('โหลดข้อมูลสำเร็จ:', data);
+
+                // ซ่อน loading
+                loading.style.display = 'none';
+
+                // แสดงสถิติ
+                stats.innerHTML = `📊 พบสินค้าทั้งหมด ${data.length} รายการ`;
+                stats.style.display = 'block';
+
+                // แสดงสินค้า
+                displayProducts(data);
+
+            } catch (err) {
+                console.error('Error:', err);
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.innerHTML = `
+                    <h3>❌ เกิดข้อผิดพลาด</h3>
+                    <p>${err.message}</p>
+                    <small>กรุณาตรวจสอบว่า Express server ทำงานอยู่ที่ http://localhost:3000</small>
+                `;
+            }
+        }
+
+        function displayProducts(data) {
+            const container = document.getElementById('products');
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: white;">ไม่พบข้อมูลสินค้า</p>';
+                return;
+            }
+
+            const html = data.map(product => `
+                <div class="product-card">
+                    <div class="product-id">#${product.id}</div>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-description">${product.description}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // โหลดข้อมูลเมื่อหน้าเว็บพร้อม
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>
